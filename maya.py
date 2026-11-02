@@ -2784,6 +2784,24 @@ def stamp_pack(pack: Path, shards: list) -> None:
         pass
 
 
+def pack_index_files(pack: Path) -> list | None:
+    """The model files a DS4 pack's tensors.txt reads (its 'file N <path>' lines, relative to the model folder), or
+    None when it names none (an older pack: the caller globs the model folder as before).  A quant that takes its
+    Engram tables (or drafter, vision) from a set beside the model folder names them THERE - the pack is built from
+    those files, and a same-named file an earlier layout left in the model folder is not one of them."""
+    try:
+        lines = (pack / "tensors.txt").read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+    out = []
+    for ln in lines:
+        m = re.match(r"file \d+ (.+)", ln)
+        if m:
+            p = Path(m.group(1).strip())
+            out.append(p if p.is_absolute() else pack.parent / p)
+    return out or None
+
+
 def check_sha256(shards: list, quant: str | None) -> None:
     """The files a pack is built from (or Metal reads): a Maya download's against its published sha256 (once a file - a
     download is checked as it lands), so a file still being written or damaged stops here, not as garbage answers (#155)."""
@@ -4055,10 +4073,12 @@ def server_command(cfg_path: Path, a) -> tuple:
         if p is None or not p.exists():
             fail(f"{cfg_path.name}: {what} is missing ({p})", f"run {ME} --setup to repair it")
     # a model file changed after its pack was built (pack_stale, #155): the pack's places in it are wrong
-    if ds4 and (pack / PACK_SOURCES).exists():
+    if ds4 and pack is not None and (pack / PACK_SOURCES).exists():
         rec = {r.get("name") for r in read_json(pack / PACK_SOURCES).get("files") or []}
-        why = pack_stale(pack, [s for s in ds4_shards(pack.parent) if s.name in rec or not rec])   # (its own files:
-        # the folder may also hold an earlier layout's)
+        files = pack_index_files(pack)                     # the files the pack's index itself reads: a shared Engram
+        if files is None:                                  # set (or drafter, vision) lives beside the model folder, so
+            files = ds4_shards(pack.parent)                # match those, not a same-named file an earlier layout
+        why = pack_stale(pack, [s for s in files if s.exists() and (s.name in rec or not rec)])   # left there
         if why is not None:
             fail(f"{cfg_path.name}: {why}, so its index of where the tensors sit is wrong",
                  f"run {ME} --setup --repack to build it again (a minute)")
