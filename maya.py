@@ -4871,6 +4871,46 @@ def ds4_upgrade_note(m: dict, d: Path) -> None:
         f"({len(m['files'])} model files; the n-gram table files you have are kept).")
 
 
+def ds4_table_dupes(pack: Path, d: Path) -> list:
+    """A second copy of a file the pack reads from beside the model folder (a shared Engram set: Engram-Q6_K) left in
+    the model folder d under the same name - Maya-XS v1's table shards after the update to v2 (#777): a hard link to
+    the shared copy takes its place, so the disk holds one copy and any path to either name still works.  Only when
+    both were checked against the same published sha256 (VERIFIED, size and time unchanged) - else left as they are.
+    The names relinked."""
+    done = []
+    for f in pack_index_files(pack) or []:
+        if f.parent.resolve() == d.resolve() or not f.is_file():
+            continue
+        old = d / f.name
+        try:
+            if not old.is_file() or os.path.samefile(old, f) or old.stat().st_size != f.stat().st_size:
+                continue
+        except OSError:
+            continue
+
+        def verified(p: Path) -> bool:
+            seen, st = read_json(p.parent / VERIFIED).get(p.name) or {}, p.stat()
+            return seen.get("size") == st.st_size and seen.get("mtime_ns") == st.st_mtime_ns
+
+        if not (verified(old) and verified(f)):
+            continue
+        tmp = old.with_name(old.name + ".link")
+        try:
+            os.link(f, tmp)
+            os.replace(tmp, old)
+            done.append(old.name)
+            book, st = read_json(d / VERIFIED), old.stat()   # (the same checked file now: not read again)
+            book[old.name] = {"size": st.st_size, "mtime_ns": st.st_mtime_ns}
+            (d / VERIFIED).write_text(json.dumps(book, indent=1), encoding="utf-8")
+        except OSError as x:
+            tmp.unlink(missing_ok=True)
+            warn(f"{old}: a second copy of {f} ({x}) - you can delete it")
+    if done:
+        ok(f"{len(done)} second cop{'ies' if len(done) != 1 else 'y'} of the n-gram tables in {d.name} now share "
+           f"{f.parent.name}'s ({sum((d / n).stat().st_size for n in done) / 1e9:.0f} GB back)")
+    return done
+
+
 def ds4_upgrade_drop(old: dict, m: dict, d: Path) -> list:
     """After the upgrade: delete the old layout's files that m does not use (not m's own, not m["tables"]), but only
     when every one of m's files is whole - an interrupted download leaves the old model working.  The deleted names."""
@@ -5754,6 +5794,8 @@ def set_up_ds4(a, prev: dict) -> Path | None:
                "320 MB of the first GPU's while one is read); the server resizes the pictures")
     if upgrade:                                        # (the new files are whole and packed: the old model files go)
         ds4_upgrade_drop(upgrade, m, d)
+    if gguf:                                           # (an earlier layout's copy of the shared tables: one copy, #777)
+        ds4_table_dupes(pack, d)
     cfg_path = write_config_ds4(a, pc, meta, pack, ctx, models, d, quant, vision)   # 8
     if (drafter or not gguf) and CDS.has_drafter(read_json(cfg_path)):
         how = drafting_choice(a, "The DSpark drafter", "10-30")
