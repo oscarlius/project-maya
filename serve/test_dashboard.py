@@ -843,16 +843,21 @@ console.log(JSON.stringify({set: m.tierSet(q).find((x) => x.key === "disk"), glm
     def test_about_has_the_support_line_always_and_the_update_card_none(self):
         # owner 2026-11-05: one line on About (always, also while an update shows), its link on "supporting me" in bold
         # violet; no row under an update's button; the sidebar's heart stays
+        def english_ui(src):
+            # Localization wraps the English source in tr("..."); the default language still shows that source.
+            return re.sub(r'\$\{tr\("((?:\\.|[^"\\])*)"\)\}',
+                          lambda m: m.group(1).replace(r"\"", '"').replace(r"\\", "\\"), src)
+
         web = ROOT / "serve" / "web"
         js = (web / "settings.js").read_text(encoding="utf-8")
         line = js[js.index("const SupportLine"):js.index("function UpdateCard")]
-        body = line.split("<span>", 1)[1].split("</span></p>", 1)[0].replace('${" "}', " ")
+        body = english_ui(line.split("<span>", 1)[1].split("</span></p>", 1)[0]).replace('${" "}', " ")
         text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", body))
         self.assertEqual(text, "I build Maya because I believe everyone should have access to great local AI. If you enjoy "
                                "what I'm building, consider supporting me. Every little bit helps keep the project alive "
                                "and growing. ❤️")
         self.assertRegex(line, r'<a class="support-link" href=\$\{SUPPORT_URL\} target="_blank" rel="noopener"\s+'
-                               r'title="[^"]*">supporting me</a>')
+                               r'title=\$\{tr\("Sponsor Maya on GitHub"\)\}>\$\{tr\("supporting me"\)\}</a>')
         self.assertNotIn('name="heart"', line)                               # (no second heart before the text)
         card = js[js.index("function UpdateCard"):js.index("\n}\n", js.index("function UpdateCard"))]
         self.assertNotIn("SupportLine", card)
