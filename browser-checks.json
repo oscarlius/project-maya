@@ -1,0 +1,140 @@
+{
+  "head": "3daffa79cf83eb83ed28e9259c0f34eac2b4a284",
+  "browser": {
+    "browser": "Google Chrome",
+    "version": "156.0.8078.80",
+    "os": "Windows",
+    "versionSource": "installed chrome.exe ProductVersion"
+  },
+  "physicalMobileTested": false,
+  "scope": "real current-PR UI with invented loopback APIs/SSE; no model requests",
+  "checks": [
+    {
+      "name": "chat-desktop-en",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "en",
+      "width": 1440
+    },
+    {
+      "name": "settings-desktop-en",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "en",
+      "width": 1440
+    },
+    {
+      "name": "settings-desktop-zh",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "zh-CN",
+      "width": 1440
+    },
+    {
+      "name": "chat-desktop-zh",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "zh-CN",
+      "width": 1440
+    },
+    {
+      "name": "monitor-desktop-zh",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "zh-CN",
+      "width": 1440
+    },
+    {
+      "name": "models-desktop-zh",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "zh-CN",
+      "width": 1440
+    },
+    {
+      "name": "models-desktop-en",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "en",
+      "width": 1440
+    },
+    {
+      "name": "monitor-desktop-en",
+      "documentWidth": 1440,
+      "height": 1000,
+      "lang": "en",
+      "width": 1440
+    },
+    {
+      "name": "monitor-narrow-en",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "en",
+      "width": 390
+    },
+    {
+      "name": "models-narrow-en",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "en",
+      "width": 390
+    },
+    {
+      "name": "settings-narrow-list-en",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "en",
+      "width": 390
+    },
+    {
+      "name": "settings-narrow-en",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "en",
+      "width": 390
+    },
+    {
+      "name": "settings-narrow-zh",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "zh-CN",
+      "width": 390
+    },
+    {
+      "name": "settings-narrow-list-zh",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "zh-CN",
+      "width": 390
+    },
+    {
+      "name": "models-narrow-zh",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "zh-CN",
+      "width": 390
+    },
+    {
+      "name": "monitor-narrow-zh",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "zh-CN",
+      "width": 390
+    },
+    {
+      "name": "chat-narrow-zh",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "zh-CN",
+      "width": 390
+    },
+    {
+      "name": "chat-narrow-en",
+      "documentWidth": 390,
+      "height": 844,
+      "lang": "en",
+      "width": 390
+    }
+  ],
+  "console": []
+}
